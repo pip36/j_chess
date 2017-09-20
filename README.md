@@ -25,5 +25,5 @@ This will generate a standard chessboard.
 
     chess.new("2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2");
  
-(Mate in 2, white to move, by the way)
+(white to move, Mate in 2, by the way)
 ![Example](/ChessPosition.JPG)
