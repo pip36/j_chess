@@ -21,6 +21,8 @@ This will generate a standard chessboard.
 	     chess.new();
     });
     
-.new() accepts a FEN string to generate a custom starting position
+**.new()** accepts a FEN string to generate a custom starting position
 
-    chess.new("qqqqkqqq/pppppppp/8/8/8/8/PPPPPPPP/QQQKQQQQ");
+    chess.new("2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2");
+    
+![Example](/ChessPosition.JPG)
