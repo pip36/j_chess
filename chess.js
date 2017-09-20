@@ -3,18 +3,18 @@ function Chess(){
 
 	//The unicode characters for each chess piece
 	var CHESS_CHARACTERS = {
-		"p": "&#9817;",
-		"P": "&#9823;",
-		"r": "&#9814;",
-		"R": "&#9820;",
-		"n": "&#9816;",
-		"N": "&#9822;",
-		"b": "&#9815;",
-		"B": "&#9821;",
-		"q": "&#9813;",
-		"Q": "&#9819;",
-		"k": "&#9812;",
-		"K": "&#9818;",
+		"P": "&#9817;",
+		"p": "&#9823;",
+		"R": "&#9814;",
+		"r": "&#9820;",
+		"N": "&#9816;",
+		"n": "&#9822;",
+		"B": "&#9815;",
+		"b": "&#9821;",
+		"Q": "&#9813;",
+		"q": "&#9819;",
+		"K": "&#9812;",
+		"k": "&#9818;",
 		"0": " "
 	}
 
@@ -38,8 +38,8 @@ function Chess(){
 
 	//Check if the content of a square matches the current player
 	var isOwnPiece = function(content){
-		if((content == content.toUpperCase() && game.currentPlayer == -1) ||
-			(content != content.toUpperCase() && game.currentPlayer == 1)){
+		if((content == content.toUpperCase() && game.currentPlayer == 1) ||
+			(content != content.toUpperCase() && game.currentPlayer == -1)){
 			return true;
 		}
 		else{ return false; }
@@ -76,7 +76,7 @@ function Chess(){
 				}
 				else{ Output += rowString.charAt(j);}
 			}
-			result.unshift(Output.split(""));
+			result.push(Output.split(""));
 		} 
 		return result;
 	}
@@ -150,11 +150,11 @@ function Chess(){
 			checkPath(DIAGONAL_MOVES,x,y, false);
 		}
 		//BLACK PAWN (returns all moves including capture moves)
-		if(board[x][y] == "P"){
+		if(board[x][y] == "p"){
 			checkPath(PAWN_MOVES_BLACK,x,y, false);
 		}
 		//WHITE PAWN
-		if(board[x][y] == "p"){
+		if(board[x][y] == "P"){
 			checkPath(PAWN_MOVES_WHITE,x,y, false);
 		}	
 		return result;
@@ -253,7 +253,7 @@ function Chess(){
 			newBoardState[result[i][0]][result[i][1]] = newBoardState[game.activeSquare[0]][game.activeSquare[1]];
 			newBoardState[game.activeSquare[0]][game.activeSquare[1]] = "0";
 			var kingPosition = getKingPosition(newBoardState, game.currentPlayer);
-			if(isCellAttacked(newBoardState, kingPosition[0], kingPosition[1])){
+		    if(isCellAttacked(newBoardState, kingPosition[0], kingPosition[1])){
 				result.splice(i,1);
 				i--;
 			}
@@ -271,13 +271,15 @@ function Chess(){
 					var currentX = x, currentY = y;			
 					var newPosition = [currentX + moveArr[i][0], currentY + moveArr[i][1]];
 					while(isOnBoard(newPosition)){ 
+
 						var destinationContents = boardData[newPosition[0]][newPosition[1]];
+						console.log(newPosition + " " + destinationContents);
 						if(destinationContents != "0"){ 
 							if(isOwnPiece(destinationContents)){
 								break;
 							}
 							else{
-								for(var p = 0; p < attackerArr.length; p++){
+								for(var p = 0; p < attackerArr.length; p++){							
 									if(destinationContents.toUpperCase() == attackerArr[p]){
 										$('#' + (8-newPosition[0]) + " td").eq(newPosition[1]).addClass("attacker");								
 										return true;
@@ -300,10 +302,11 @@ function Chess(){
 					if(isOnBoard(newPosition)){
 						var destinationContents = boardData[newPosition[0]][newPosition[1]]; 
 						if(destinationContents != "0"){ 
-							if((destinationContents == destinationContents.toUpperCase() && game.currentPlayer == 1) ||
-							(destinationContents != destinationContents.toUpperCase() && game.currentPlayer == -1)){ //if piece is different color
+							if((destinationContents == destinationContents.toUpperCase() && game.currentPlayer == -1) ||
+							(destinationContents != destinationContents.toUpperCase() && game.currentPlayer == 1)){ //if piece is different color
 								for(var p = 0; p < attackerArr.length; p++){
 									if(destinationContents.toUpperCase() == attackerArr[p]){
+										console.log("fire2");
 										$('#' + (8-newPosition[0]) + " td").eq(newPosition[1]).addClass("attacker");								
 										return true;
 									}
@@ -312,7 +315,8 @@ function Chess(){
 						}
 					}				
 				}
-			}				
+			}	
+			return false;			
 		}
 		//check each path for attackers
 		if((findAttackers(boardData, CROSS_MOVES, x, y, ["R","Q"], true)) ||
@@ -322,6 +326,8 @@ function Chess(){
 			(findAttackers(boardData, DIAGONAL_MOVES, x, y, ["K"], false))){
 			return true;
 		}
+
+		
 		
 		//****** REFACTOR *******//
 		//special case for pawns	
@@ -331,7 +337,7 @@ function Chess(){
 			var testPosition = [currentX - 1, currentY - 1];		
 			if(isOnBoard(testPosition)){
 				var destinationContents = boardData[testPosition[0]][testPosition[1]];
-				if (destinationContents == "P"){
+				if (destinationContents == "p"){
 					$('#' + (8-testPosition[0]) + " td").eq(testPosition[1]).addClass("attacker");
 					return true;
 				}
@@ -339,7 +345,7 @@ function Chess(){
 			var testPosition = [currentX - 1, currentY + 1];		
 			if(isOnBoard(testPosition)){
 				var destinationContents = boardData[testPosition[0]][testPosition[1]];
-				if(destinationContents == "P"){
+				if(destinationContents == "p"){
 					$('#' + (8-testPosition[0]) + " td").eq(testPosition[1]).addClass("attacker");
 					return true;
 				}
@@ -353,7 +359,7 @@ function Chess(){
 			
 			if(isOnBoard(testPosition)){
 				var destinationContents = boardData[testPosition[0]][testPosition[1]];
-				if (destinationContents == "p"){
+				if (destinationContents == "P"){
 					$('#' + (8-testPosition[0]) + " td").eq(testPosition[1]).addClass("attacker");
 					return true;
 				}
@@ -362,7 +368,7 @@ function Chess(){
 			
 			if(isOnBoard(testPosition)){
 				var destinationContents = boardData[testPosition[0]][testPosition[1]];
-				if(destinationContents == "p"){
+				if(destinationContents == "P"){
 					$('#' + (8-testPosition[0]) + " td").eq(testPosition[1]).addClass("attacker");
 					return true;
 				}
@@ -426,10 +432,10 @@ function Chess(){
 	var getKingPosition = function(boardData, player){
 		for(var x = 0; x < 8; x++){
 			for(var y = 0; y < 8; y++){
-				if(boardData[x][y] == "k" && player == 1){
+				if(boardData[x][y] == "k" && player == -1){
 					return [x,y];
 				}
-				else if(boardData[x][y] == "K" && player == -1){
+				else if(boardData[x][y] == "K" && player == 1){
 					return[x,y];
 				}
 			}
@@ -443,7 +449,7 @@ function Chess(){
 				var content = game.currentBoardState[x][y];
 				game.activeSquare = [x,y];
 				//if clicking on a square show any available moves		
-				if((content == content.toUpperCase() && game.currentPlayer == -1) || (content != content.toUpperCase() && game.currentPlayer == 1)){			
+				if((content == content.toUpperCase() && game.currentPlayer == 1) || (content != content.toUpperCase() && game.currentPlayer == -1)){			
 					var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content);
 					if(validMoves.length > 0){
 						return false;
@@ -550,11 +556,11 @@ function Chess(){
 				//if its a pawn promotion call function
 				if(this.currentPlayer == 1 && x == 0){
 					console.log("promote");
-					activeContent = "q";
+					activeContent = "Q";
 				}
 				else if(this.currentPlayer == -1 && x == 7){
 					console.log("promote black");
-					activeContent = "Q";
+					activeContent = "q";
 				}
 
 
@@ -589,21 +595,21 @@ function Chess(){
 			
 			//look for checks on the board, display them and log them appropriately
 			var kingPosition = getKingPosition(this.currentBoardState, this.currentPlayer);
-			if(isCellAttacked(this.currentBoardState, kingPosition[0], kingPosition[1])){
+		    if(isCellAttacked(this.currentBoardState, kingPosition[0], kingPosition[1])){
 				var currentPos = arrToAlgebraic(initialPosition);
 			
 				logMove(moveText([x,y], activeContent, isCapture, currentPos[0], true, false));
 				
 				//if there are no possible moves ITS CHECKMATE
 				if(NoValidMoves(this.currentBoardState)){
-					console.log("CheckMate!");
+					alert("CheckMate!");
 					return
 				}
 				return
 			}
 			//when not in check and there are no moves its stalemate
 			if(NoValidMoves(this.currentBoardState)){
-				console.log("StaleMate");
+				alert("StaleMate");
 				return
 			}
 			//log normal and enpassant moves to the move list
@@ -743,7 +749,7 @@ function Chess(){
 
 			//if clicking on a square show any available moves
 			clearOverlay();
-			if((content == content.toUpperCase() && game.currentPlayer == -1) || (content != content.toUpperCase() && game.currentPlayer == 1)){	
+			if(isOwnPiece(content)){	
 				$('#' + (8-x) + " td").eq(y).addClass("active");	
 				game.activeSquare = [x,y];			
 				var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content);		
