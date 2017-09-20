@@ -790,6 +790,10 @@ function Chess(){
 		game.start("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 	}
 
+	this.makeMove = function(square1, square2){
+
+	}
+
 
 
 }
