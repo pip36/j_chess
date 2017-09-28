@@ -465,6 +465,13 @@ function Chess(){
 		var char = String.fromCharCode(97 + arr[1]);
 		return char + (8-arr[0]).toString()
 	}
+//convert algebraic notation to array
+	var algebraicToArray = function(string){
+		var arr = string.split('');
+		var y = arr[0].charCodeAt(0) - 97;
+		var x = 8-arr[1];
+		return [x,y];
+	}
 
 //produce move text for a given move eg ("fxh7+")
 //**** needs edge cases for differentiating between knights/rooks moving to a square where both are possible *****//
@@ -573,8 +580,6 @@ function Chess(){
 			//swap the pieces to perform the move
 			newBoardState[x][y] = activeContent;
 			newBoardState[this.activeSquare[0]][this.activeSquare[1]] = "0";
-
-
 
 			//adds the newly created boardstate to storage, and updates the current board, and active square
 			this.boardStates.push(newBoardState);
@@ -794,6 +799,37 @@ function Chess(){
 			return;
 		}
 		game.start("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+	}
+
+	this.setPosition = function(FENstring){
+		var data = FENstring.split(" ");
+		//load the given position
+		game.start(data[0]);
+
+		//set the player to move
+		if(data[1] == "w"){
+			game.currentPlayer = 1;
+		}
+		else if(data[1] == "b"){
+			game.currentPlayer = -1;
+		}
+
+		//set castling availability - qQKk
+		var castlingString = data[2];
+		game.whiteCastleKing = false;
+		game.whiteCastleQueen = false;
+		game.blackCastleKing = false;
+		game.blackCastleQueen = false;
+		if(castlingString.indexOf('K') != -1){game.whiteCastleKing = true}
+		if(castlingString.indexOf('Q') != -1){game.whiteCastleQueen = true}
+		if(castlingString.indexOf('k') != -1){game.blackCastleKing = true}
+		if(castlingString.indexOf('q') != -1){game.blackCastleQueen = true}
+
+	    //set enpassant square
+		game.enPassantSquare = algebraicToArray(data[3]);
+		$('#' + (8-game.enPassantSquare[0]) + " td").eq(game.enPassantSquare[1]).addClass("passant");
+		console.log(game.enPassantSquare);
+
 	}
 
 	this.makeMove = function(square1, square2){
