@@ -273,7 +273,7 @@ function Chess(){
 					while(isOnBoard(newPosition)){ 
 
 						var destinationContents = boardData[newPosition[0]][newPosition[1]];
-						console.log(newPosition + " " + destinationContents);
+					
 						if(destinationContents != "0"){ 
 							if(isOwnPiece(destinationContents)){
 								break;
@@ -306,7 +306,7 @@ function Chess(){
 							(destinationContents != destinationContents.toUpperCase() && game.currentPlayer == 1)){ //if piece is different color
 								for(var p = 0; p < attackerArr.length; p++){
 									if(destinationContents.toUpperCase() == attackerArr[p]){
-										console.log("fire2");
+									
 										$('#' + (8-newPosition[0]) + " td").eq(newPosition[1]).addClass("attacker");								
 										return true;
 									}
@@ -562,11 +562,11 @@ function Chess(){
 				}
 				//if its a pawn promotion call function
 				if(this.currentPlayer == 1 && x == 0){
-					console.log("promote");
+				
 					activeContent = "Q";
 				}
 				else if(this.currentPlayer == -1 && x == 7){
-					console.log("promote black");
+
 					activeContent = "q";
 				}
 
@@ -692,6 +692,7 @@ function Chess(){
 			//re render the board
 			renderBoard(this.currentBoardState);
 			$('td').removeClass('selected active attacker castle passant');
+			game.enPassantSquare = null;
 		}
 
 	}
@@ -828,12 +829,39 @@ function Chess(){
 	    //set enpassant square
 		game.enPassantSquare = algebraicToArray(data[3]);
 		$('#' + (8-game.enPassantSquare[0]) + " td").eq(game.enPassantSquare[1]).addClass("passant");
-		console.log(game.enPassantSquare);
+	
 
 	}
 
 	this.makeMove = function(square1, square2){
+		//game.move relies on active square being set
+		var firstSquare = algebraicToArray(square1);
+		game.activeSquare = firstSquare;	
+		var destinationSquare = algebraicToArray(square2);
+		var content = game.currentBoardState[firstSquare[0]][firstSquare[1]];
+		var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,firstSquare[0],firstSquare[1]), content);		
+		game.currentValidMoves = validMoves;
+		console.log(validMoves);
 
+		if(game.enPassantSquare && game.enPassantSquare[0] == destinationSquare[0] && game.enPassantSquare[1] == destinationSquare[1]){
+			for(var i = 0; i < game.currentValidMoves.length; i++){
+				if(game.currentValidMoves[i][0] == destinationSquare[0] && game.currentValidMoves[i][1] == destinationSquare[1]){
+					game.enPassant(destinationSquare[0], destinationSquare[1]);
+					return
+				}
+			}
+			console.log("INVALID MOVE");
+		}
+		else{
+			for(var i = 0; i < game.currentValidMoves.length; i++){
+				if(game.currentValidMoves[i][0] == destinationSquare[0] && game.currentValidMoves[i][1] == destinationSquare[1]){
+					game.move(destinationSquare[0], destinationSquare[1], false);
+					return
+				}
+			}
+			console.log("INVALID MOVE");		
+		}
+		
 	}
 
 
