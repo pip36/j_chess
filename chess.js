@@ -559,6 +559,8 @@ function Chess(){
 						this.enPassantSquare = [x-1,y];
 						$('#' + (8-this.enPassantSquare[0]) + " td").eq(this.enPassantSquare[1]).addClass("passant");
 					}
+				}else{
+					this.enPassantSquare = null;
 				}
 				//if its a pawn promotion call function
 				if(this.currentPlayer == 1 && x == 0){
@@ -569,14 +571,13 @@ function Chess(){
 
 					activeContent = "q";
 				}
-
-
 			}
 			//reset the enpassant square when aother piece is moved
 			else{
 				this.enPassantSquare = null;
 			}
 			
+			console.log(this.enPassantSquare);
 			//swap the pieces to perform the move
 			newBoardState[x][y] = activeContent;
 			newBoardState[this.activeSquare[0]][this.activeSquare[1]] = "0";
@@ -827,10 +828,10 @@ function Chess(){
 		if(castlingString.indexOf('q') != -1){game.blackCastleQueen = true}
 
 	    //set enpassant square
-		game.enPassantSquare = algebraicToArray(data[3]);
-		$('#' + (8-game.enPassantSquare[0]) + " td").eq(game.enPassantSquare[1]).addClass("passant");
-	
-
+		if(data[3] != '-'){
+			game.enPassantSquare = algebraicToArray(data[3]);
+			$('#' + (8-game.enPassantSquare[0]) + " td").eq(game.enPassantSquare[1]).addClass("passant");
+		}
 	}
 
 	this.makeMove = function(square1, square2){
@@ -860,8 +861,22 @@ function Chess(){
 				}
 			}
 			console.log("INVALID MOVE");		
-		}
+		}	
+	}
+
+	this.moveSAN = function(san){
 		
+	}
+
+	this.loadPng = function(png){
+		/*
+			1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. Bf4 Bg7 5. Be5 dxc4 6. e3 Nc6 7. Qa4 O-O
+			8. Bxf6 Bxf6 9. Bxc4 a6 10. Bd5 b5 11. Qd1 Bb7 12. a3 e6 13. Bf3 Na5
+			14. Bxb7 Nxb7 15. b4 c5 16. bxc5 Nxc5 17. Nf3 Qa5 18. Qc2 Na4 19. Rc1 Rac8
+			20. O-O Qxc3 21. Qe2 Qxa3 22. Rc2 Rxc2 23. Qxc2 Qc3 24. Qe4 Rc8 25. g3 Qc2
+			26. Qb7 Qc6 0-1
+		*/
+
 	}
 
 
