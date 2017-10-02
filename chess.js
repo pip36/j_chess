@@ -162,7 +162,7 @@ function Chess(){
 
 	//takes a list of possible moves, and returns only the moves that are considered valid according to the board position
 
-	var validateMovesList = function(boardData, movePaths, pieceType){
+	var validateMovesList = function(boardData, movePaths, pieceType, currentSquare){
 		var result = [];
 		var b = boardData;
 		//PAWN VALIDATION (requires extra validation for capture moves, double moves)
@@ -250,9 +250,10 @@ function Chess(){
 		for(var i = 0; i < result.length; i++){
 			//create copy of future board and assess it for check (is the king attacked)
 			var newBoardState = JSON.parse(JSON.stringify(game.currentBoardState)); 
-			newBoardState[result[i][0]][result[i][1]] = newBoardState[game.activeSquare[0]][game.activeSquare[1]];
-			newBoardState[game.activeSquare[0]][game.activeSquare[1]] = "0";
+			newBoardState[result[i][0]][result[i][1]] = newBoardState[currentSquare[0]][currentSquare[1]];
+			newBoardState[currentSquare[0]][currentSquare[1]] = "0";
 			var kingPosition = getKingPosition(newBoardState, game.currentPlayer);
+			console.log(arrToAlgebraic(kingPosition));
 		    if(isCellAttacked(newBoardState, kingPosition[0], kingPosition[1])){
 				result.splice(i,1);
 				i--;
@@ -328,7 +329,6 @@ function Chess(){
 		}
 
 		
-		
 		//****** REFACTOR *******//
 		//special case for pawns	
 		if(game.currentPlayer == 1){
@@ -390,7 +390,7 @@ function Chess(){
 	}
 
 	//checks if the current player is able to castle AND adds visual AND adds as a valid move
-	// *** code repetition tidy up ***// define castling positions as CONSTANTS 
+	// *** code repetition tidy up ***// 
 	var canCastle = function(boardData){
 		if(game.currentPlayer == 1){
 			if(game.whiteCastleKing){
@@ -447,10 +447,10 @@ function Chess(){
 		for(var x = 0; x < 8; x++){
 			for(var y = 0; y < 8; y++){					
 				var content = game.currentBoardState[x][y];
-				game.activeSquare = [x,y];
+				var currentSquare = [x,y];
 				//if clicking on a square show any available moves		
 				if((content == content.toUpperCase() && game.currentPlayer == 1) || (content != content.toUpperCase() && game.currentPlayer == -1)){			
-					var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content);
+					var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content, currentSquare);
 					if(validMoves.length > 0){
 						return false;
 					}				
@@ -516,6 +516,14 @@ function Chess(){
 		}		
 	}
 
+	var getValidMoves = function(square){
+		var boardData = game.currentBoardState;
+		var currentSquare = algebraicToArray(square);
+		var piece = boardData[currentSquare[0]][currentSquare[1]];
+		var moveList = getPseudoMoves(boardData, currentSquare[0], currentSquare[1]);
+		return validateMovesList(boardData, moveList, piece, currentSquare);
+	}
+
 	//internal class for tracking gamestate changes such as player turn/ castleing availability / en passant squares / active square
 	function Game(){
 		this.boardStates = [];
@@ -577,7 +585,6 @@ function Chess(){
 				this.enPassantSquare = null;
 			}
 			
-			console.log(this.enPassantSquare);
 			//swap the pieces to perform the move
 			newBoardState[x][y] = activeContent;
 			newBoardState[this.activeSquare[0]][this.activeSquare[1]] = "0";
@@ -759,7 +766,7 @@ function Chess(){
 			if(isOwnPiece(content)){	
 				$('#' + (8-x) + " td").eq(y).addClass("active");	
 				game.activeSquare = [x,y];			
-				var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content);		
+				var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,x,y), content, game.activeSquare);		
 				game.currentValidMoves = validMoves;				
 				renderMoves(validMoves);
 				if(content.toUpperCase() == "K"){
@@ -840,7 +847,7 @@ function Chess(){
 		game.activeSquare = firstSquare;	
 		var destinationSquare = algebraicToArray(square2);
 		var content = game.currentBoardState[firstSquare[0]][firstSquare[1]];
-		var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,firstSquare[0],firstSquare[1]), content);		
+		var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,firstSquare[0],firstSquare[1]), content, game.activeSquare);		
 		game.currentValidMoves = validMoves;
 		console.log(validMoves);
 
@@ -865,18 +872,99 @@ function Chess(){
 	}
 
 	this.moveSAN = function(san){
-		
+		var self = this;
+		var san = san.toLowerCase();
+		san = san.replace('x', '').replace('+', '');
+		var arr = san.split('');
+	
+		if((arr[0].toUpperCase() == "B" && arr[1].match(/[a-h]/) != null) || (arr[0].match(/[a-h]/) == null)){ //PIECE MOVES
+			console.log("piecemove");
+			//find matching pieces
+			var pieces = self.getPiecePositions(arr[0]);
+			if(pieces.length == 0){ return "INVALID MOVE" } //cant find piece, invalid move
+			else{ // found pieces
+				var movestring = ""; 
+				var file = null;
+				if(arr[2].match(/[a-h]/) != null){ 
+					movestring = arr.slice(2).join('');
+					file = arr[1].toLowerCase().charCodeAt(0) - 97;
+				}
+				else{ movestring = arr.slice(1,3).join(''); }	
+				for(var i = 0; i < pieces.length; i++){
+					if(file && file != pieces[i][1]){ continue; }
+					var validMoves = getValidMoves(arrToAlgebraic(pieces[i]));
+					//check if valid moves contain the given san string
+					for(var j = 0; j < validMoves.length; j++){
+						if(arrToAlgebraic(validMoves[j]) == movestring){
+							return self.makeMove(arrToAlgebraic(pieces[i]), arrToAlgebraic(validMoves[j]));
+						}
+					}
+				}
+				console.log("INVALID MOVE");
+			}
+		}
+
+		if(arr[0].match(/[a-h]/) != null){ //Begins with file, pawn move
+			console.log("pawn move");
+			//find pawn on the matching file
+			var pawns = self.getPawns(arr[0]);
+			if(pawns.length == 0){ return "INVALID MOVE" } //no pawn on specified file
+			else{
+				var movestring = "";
+				if(arr[1].match(/[a-h]/) != null){ movestring = arr.slice(1,3).join(''); }
+				else{ movestring = arr.slice(0,2).join(''); }
+				console.log(movestring);
+				for(var i = 0; i < pawns.length; i++){
+					var validMoves = getValidMoves(arrToAlgebraic(pawns[i]));
+					//check if valid moves contain the given san string
+					for(var j = 0; j < validMoves.length; j++){
+						if(arrToAlgebraic(validMoves[j]) == movestring){
+							return self.makeMove(arrToAlgebraic(pawns[i]), arrToAlgebraic(validMoves[j]));
+						}
+					}
+				}
+				console.log("INVALID MOVE");
+			}
+		}
 	}
 
 	this.loadPng = function(png){
-		/*
-			1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. Bf4 Bg7 5. Be5 dxc4 6. e3 Nc6 7. Qa4 O-O
-			8. Bxf6 Bxf6 9. Bxc4 a6 10. Bd5 b5 11. Qd1 Bb7 12. a3 e6 13. Bf3 Na5
-			14. Bxb7 Nxb7 15. b4 c5 16. bxc5 Nxc5 17. Nf3 Qa5 18. Qc2 Na4 19. Rc1 Rac8
-			20. O-O Qxc3 21. Qe2 Qxa3 22. Rc2 Rxc2 23. Qxc2 Qc3 24. Qe4 Rc8 25. g3 Qc2
-			26. Qb7 Qc6 0-1
-		*/
+		
+	}
 
+	this.validMoves = function(san){
+		return getValidMoves(san);
+	}
+
+	this.getPawns = function(file){
+		var boardData = game.currentBoardState;
+		var y = file.toLowerCase().charCodeAt(0) - 97;
+		var result = [];
+		for(var x = 0; x < 8; x++){
+			if(boardData[x][y] == "p" && game.currentPlayer == -1){
+				result.push([x,y]);
+			}
+			else if(boardData[x][y] == "P" && game.currentPlayer == 1){
+				result.push([x,y]);
+			}
+		}
+		return result;
+	}
+
+	this.getPiecePositions = function(piece){
+		var boardData = game.currentBoardState;
+		var result = [];
+		for(var x = 0; x < 8; x++){
+			for(var y = 0; y < 8; y++){
+				if(boardData[x][y] == piece.toLowerCase() && game.currentPlayer == -1){
+					result.push([x,y]);
+				}
+				else if(boardData[x][y] == piece.toUpperCase() && game.currentPlayer == 1){
+					result.push([x,y]);
+				}
+			}
+		}	
+		return result
 	}
 
 
