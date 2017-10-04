@@ -21,13 +21,21 @@ This will generate a standard chessboard.
 	     chess.new();
     });
 -------------------------------------   
-**.new()** accepts a FEN position to generate a custom starting position
+**.new(string)** - Optionally accepts a FEN position to generate a custom starting position.
 
     chess.new("2bqkbn1/2pppp2/np2N3/r3P1p1/p2N2B1/5Q2/PPPPKPP1/RNB2r2");
  
-(white to move, Mate in 2, by the way)
 ![Example](/ChessPosition.JPG)
 ----------------------------------------
-**.setPosition()** accept a full fen string, starting play from the given position
+**.setPosition(string)** - Accepts a full fen string, starting play from the given position.
 
-	chess.setPosition('rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2')
+	chess.setPosition('rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2');
+----------------------------------------
+**.makeMove(start,destination)** - Make a move for the current player if it is valid (accepts lower case strings)
+	
+	chess.makeMove('e2', 'e4');
+---------------------------------------
+**.moveSAN(sanstring)** - Make a move given the standard algebraic notation string. (string can optionally include captures and check)
+	
+	chess.moveSAN('nxf2+');
+--------------------------------------
