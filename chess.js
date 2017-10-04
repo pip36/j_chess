@@ -253,7 +253,6 @@ function Chess(){
 			newBoardState[result[i][0]][result[i][1]] = newBoardState[currentSquare[0]][currentSquare[1]];
 			newBoardState[currentSquare[0]][currentSquare[1]] = "0";
 			var kingPosition = getKingPosition(newBoardState, game.currentPlayer);
-			console.log(arrToAlgebraic(kingPosition));
 		    if(isCellAttacked(newBoardState, kingPosition[0], kingPosition[1])){
 				result.splice(i,1);
 				i--;
@@ -853,7 +852,6 @@ function Chess(){
 		var content = game.currentBoardState[firstSquare[0]][firstSquare[1]];
 		var validMoves = validateMovesList(game.currentBoardState, getPseudoMoves(game.currentBoardState,firstSquare[0],firstSquare[1]), content, game.activeSquare);		
 		game.currentValidMoves = validMoves;
-		console.log(validMoves);
 
 		if(game.enPassantSquare && game.enPassantSquare[0] == destinationSquare[0] && game.enPassantSquare[1] == destinationSquare[1]){
 			for(var i = 0; i < game.currentValidMoves.length; i++){
@@ -862,7 +860,7 @@ function Chess(){
 					return
 				}
 			}
-			console.log("INVALID MOVE");
+			return "INVALID MOVE"
 		}
 		else{
 			for(var i = 0; i < game.currentValidMoves.length; i++){
@@ -871,7 +869,7 @@ function Chess(){
 					return
 				}
 			}
-			console.log("INVALID MOVE");		
+			return "INVALID MOVE"		
 		}	
 	}
 
@@ -882,7 +880,6 @@ function Chess(){
 		var arr = san.split('');
 	
 		if((arr[0].toUpperCase() == "B" && arr[1].match(/[a-h]/) != null) || (arr[0].match(/[a-h]/) == null)){ //PIECE MOVES
-			console.log("piecemove");
 			//find matching pieces
 			var pieces = self.getPiecePositions(arr[0]);
 			if(pieces.length == 0){ return "INVALID MOVE" } //cant find piece, invalid move
@@ -904,12 +901,11 @@ function Chess(){
 						}
 					}
 				}
-				console.log("INVALID MOVE");
+				return "INVALID MOVE"
 			}
 		}
 
 		if(arr[0].match(/[a-h]/) != null){ //Begins with file, pawn move
-			console.log("pawn move");
 			//find pawn on the matching file
 			var pawns = self.getPawns(arr[0]);
 			if(pawns.length == 0){ return "INVALID MOVE" } //no pawn on specified file
@@ -917,7 +913,6 @@ function Chess(){
 				var movestring = "";
 				if(arr[1].match(/[a-h]/) != null){ movestring = arr.slice(1,3).join(''); }
 				else{ movestring = arr.slice(0,2).join(''); }
-				console.log(movestring);
 				for(var i = 0; i < pawns.length; i++){
 					var validMoves = getValidMoves(arrToAlgebraic(pawns[i]));
 					//check if valid moves contain the given san string
@@ -927,7 +922,7 @@ function Chess(){
 						}
 					}
 				}
-				console.log("INVALID MOVE");
+				return "INVALID MOVE"
 			}
 		}
 	}
