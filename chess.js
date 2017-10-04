@@ -718,7 +718,7 @@ function Chess(){
 				var activeContent = game.currentBoardState[game.activeSquare[0]][game.activeSquare[1]];
 			}
 		
-			if($(this).hasClass("passant")){
+			if($(this).hasClass("passant") && content.toUpperCase() == "P"){
 				for(var i = 0; i < game.currentValidMoves.length; i++){
 					if(game.currentValidMoves[i][0] == x && game.currentValidMoves[i][1] == y){
 						game.enPassant(x,y);
@@ -803,6 +803,8 @@ function Chess(){
 	}
 
 	this.new = function(FENString){
+		game.boardStates = [];
+		game.currentMove = 0;
 		if(FENString){
 			game.start(FENString);
 			return;
@@ -813,6 +815,8 @@ function Chess(){
 	this.setPosition = function(FENstring){
 		var data = FENstring.split(" ");
 		//load the given position
+		game.boardStates = [];
+		game.currentMove = 0;
 		game.start(data[0]);
 
 		//set the player to move
@@ -928,6 +932,10 @@ function Chess(){
 		}
 	}
 
+	this.clearView = function(){
+		clearOverlay();
+	}
+
 	this.loadPng = function(png){
 		
 	}
@@ -965,6 +973,11 @@ function Chess(){
 			}
 		}	
 		return result
+	}
+
+	this.getCurrentPlayer = function(){
+		if(game.currentPlayer == 1){ return "white" }
+		else { return "black" }
 	}
 
 
