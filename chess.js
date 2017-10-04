@@ -717,7 +717,7 @@ function Chess(){
 				var activeContent = game.currentBoardState[game.activeSquare[0]][game.activeSquare[1]];
 			}
 		
-			if($(this).hasClass("passant") && content.toUpperCase() == "P"){
+			if($(this).hasClass("passant") && activeContent.toUpperCase() == "P"){
 				for(var i = 0; i < game.currentValidMoves.length; i++){
 					if(game.currentValidMoves[i][0] == x && game.currentValidMoves[i][1] == y){
 						game.enPassant(x,y);
